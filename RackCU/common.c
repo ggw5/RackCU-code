@@ -39,6 +39,7 @@ char* client_ip="172.30.168.79";
 /* default NIC */
 char* NIC="eth0";
 
+//gate way is no used
 /* public ip of the gateway server */ 
 char* gateway_ip="192.168.10.58"; 
 /* inner ip of the gateway server */
