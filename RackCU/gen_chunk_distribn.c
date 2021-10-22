@@ -27,6 +27,7 @@ void init_parix_fo_gen_chunk_distrbtn(){
     int rank;
     int node_id;
     int rack_id;
+    int t;
 
     int* chunk_to_node=(int*)malloc(sizeof(int)*num_chunks_in_stripe);//由chunk的id查找所在node的id
     int* chunk_map=(int*)malloc(sizeof(int)*stripe_num*num_chunks_in_stripe); // maps chunk_id to node_id
@@ -34,6 +35,7 @@ void init_parix_fo_gen_chunk_distrbtn(){
     int* num_chunk_in_rack=(int*)malloc(sizeof(int)*rack_num);//每个rack里chunk的数量
 	int rack_d_or_p[rack_num];//0 表示data rack    1表示parity rack
 	int parity_rack_num=rack_num;//可作为parity的rack数量的最大值
+    int min_parity_rack_num=rack_num-data_chunks/max_chunks_per_rack;
 	
     srand((unsigned int)time(0));
 
@@ -55,6 +57,7 @@ void init_parix_fo_gen_chunk_distrbtn(){
 		
         for(j=0; j<num_chunks_in_stripe; j++){//对条带内每个chunk分配所在node，填写rack_id
 
+
             rank=rand()%base;
             node_id=flag_index[rank];
             rack_id=get_rack_id(node_id);
@@ -68,7 +71,7 @@ void init_parix_fo_gen_chunk_distrbtn(){
 			{
 				if(rack_d_or_p[rack_id]==-1)
 				{
-					if(parity_rack_num-1==0)
+					if(parity_rack_num-min_parity_rack_num==0)
 					{
 						j--;
 						continue;
