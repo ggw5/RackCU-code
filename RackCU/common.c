@@ -1,4 +1,4 @@
-#define _GNU_SOURCE 
+#define _GNU_SOURCE
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -25,39 +25,39 @@
 // =============== Fill the ip addresses of the nodes in the evaluation =============
 
 /* it records the public ip address in socket communications */
-char* node_ip_set[total_nodes_num]={"172.30.168.80", "172.30.168.76", "172.30.168.75", "172.30.168.78", "172.30.168.77", "172.30.168.74", "172.30.168.65", "172.30.168.69", "172.30.168.73", "172.30.168.72", "172.30.168.64", "172.30.168.70", "172.30.168.68", "172.30.168.66", "172.30.168.71", "172.30.168.67"}; 
+char* node_ip_set[total_nodes_num]={"192.168.0.201", "192.168.0.202", "192.168.0.203", "192.168.0.205", "192.168.0.207", "192.168.0.208", "192.168.0.211", "192.168.0.213"};
 
 /* it records the inner ip address read from NIC */
-char* inner_ip_set[total_nodes_num]={"172.30.168.80", "172.30.168.76", "172.30.168.75", "172.30.168.78", "172.30.168.77", "172.30.168.74", "172.30.168.65", "172.30.168.69", "172.30.168.73", "172.30.168.72", "172.30.168.64", "172.30.168.70", "172.30.168.68", "172.30.168.66", "172.30.168.71", "172.30.168.67"}; 
+char* inner_ip_set[total_nodes_num]={"192.168.0.201", "192.168.0.202", "192.168.0.203", "192.168.0.205", "192.168.0.207", "192.168.0.208", "192.168.0.211", "192.168.0.213"};
 
-/* public ip of the metadata server */ 
-char* mt_svr_ip="172.30.168.81";
+/* public ip of the metadata server */
+char* mt_svr_ip="192.168.0.206";
 
-/* public ip of the client */ 
-char* client_ip="172.30.168.79";
+/* public ip of the client */
+char* client_ip="192.168.0.212";
 
 /* default NIC */
-char* NIC="eth0";
+char* NIC="eno1";
 
 //gate way is no used
-/* public ip of the gateway server */ 
-char* gateway_ip="192.168.10.58"; 
+/* public ip of the gateway server */
+char* gateway_ip="192.168.10.58";
 /* inner ip of the gateway server */
 char* gateway_local_ip="192.168.0.58";
 
 // =============== Fill the number of nodes in each rack in the evaluation ===========
 
 /* number of nodes in each rack */
-int nodes_in_racks[rack_num]={node_num_per_rack, node_num_per_rack, node_num_per_rack, node_num_per_rack,node_num_per_rack,node_num_per_rack,node_num_per_rack,node_num_per_rack};
-
-/* rack names */ 
-char* region_name[rack_num]={"Rack 0", "Rack 1", "Rack 2", "Rack 3", "Rack 4", "Rack 5", "Rack 6", "Rack 7"};
-
+//int nodes_in_racks[rack_num]={node_num_per_rack, node_num_per_rack, node_num_per_rack, node_num_per_rack,node_num_per_rack,node_num_per_rack,node_num_per_rack,node_num_per_rack};
+int nodes_in_racks[rack_num]={node_num_per_rack, node_num_per_rack, node_num_per_rack, node_num_per_rack};
+/* rack names */
+//char* region_name[rack_num]={"Rack 0", "Rack 1", "Rack 2", "Rack 3", "Rack 4", "Rack 5", "Rack 6", "Rack 7"};
+char* region_name[rack_num]={"Rack 0", "Rack 1", "Rack 2", "Rack 3"};
 // ================================ END ===============================================
 
 /*
  * a hash function to check the integrity of received data
- */ 
+ */
 unsigned int RSHash(char* str, unsigned int len)
 {
     unsigned int b    = 378551;
@@ -76,7 +76,7 @@ unsigned int RSHash(char* str, unsigned int len)
 
 /*
  * Given an ip address, this function locates its node id
- */ 
+ */
 int get_node_id(char* given_ip){
 
     int i;
@@ -108,7 +108,7 @@ void print_chunk_info(char* chunk){
 
 /*
  * This function returns the rack_id when given a node id based on the data center architecture
- */ 
+ */
 int get_rack_id(int node_id){
 
     int i;
@@ -130,8 +130,8 @@ int get_rack_id(int node_id){
 
 
 /*
- * print the region info and node info 
- */ 
+ * print the region info and node info
+ */
 void print_amazon_vm_info(char* node_ip){
 
     int node_id=get_node_id(node_ip);
@@ -144,10 +144,10 @@ void print_amazon_vm_info(char* node_ip){
 
 /*
  * print all the elements in an array
- */ 
+ */
 void print_array(int row, int col, int *array){
 
-    int i,j; 
+    int i,j;
 
     for(i=0; i<row; i++){
 
@@ -161,7 +161,7 @@ void print_array(int row, int col, int *array){
 
 /*
  * calculate the sum of all the elements in an array
- */ 
+ */
 int sum_array(int num, int* arr){
 
     int count=0;
@@ -176,7 +176,7 @@ int sum_array(int num, int* arr){
 
 /*
  * finds the maximum value of an array
- */ 
+ */
 int find_max_array(int* array, int n){
 
     int i;
@@ -194,7 +194,7 @@ int find_max_array(int* array, int n){
 
 /*
  * finds the index of the maximum value in an array
- */ 
+ */
 int find_max_array_index(int* array, int n){
 
     int i;
@@ -214,9 +214,9 @@ int find_max_array_index(int* array, int n){
 }
 
 
-/* this function is executed by the metadata server, which 
- * reads the mapping information from a mapping file and keep the 
- * mapping info in the memory 
+/* this function is executed by the metadata server, which
+ * reads the mapping information from a mapping file and keep the
+ * mapping info in the memory
  */
 void read_chunk_map(char* map_file){
 
@@ -262,9 +262,9 @@ void read_chunk_map(char* map_file){
 
 
 
-/* 
+/*
  * this function reads the ip address from the nic eth0
- */ 
+ */
 void GetLocalIp(char* local_ip)
 {
 
@@ -291,7 +291,7 @@ void GetLocalIp(char* local_ip)
 
 /*
  * this function gets the ip of the local node and returns the local_node_id in the node_ip_set
- */ 
+ */
 int get_local_node_id(){
 
     char local_ip[ip_len];
@@ -308,8 +308,8 @@ int get_local_node_id(){
 
 
 /*
- * This function initializes a client socket 
- */ 
+ * This function initializes a client socket
+ */
 int init_client_socket(int client_port_num){
 
     //set client_addr info
@@ -338,10 +338,10 @@ int init_client_socket(int client_port_num){
 
 
 /*
- * send data (e.g., data, cmd, ack) 
- */ 
+ * send data (e.g., data, cmd, ack)
+ */
 void send_data(TRANSMIT_DATA *td, char *server_ip, int port_num, ACK_DATA* ack, CMD_DATA* cmd, int send_data_type){
-	
+
 	//printf("send to ip=%s\n",server_ip);
 	//printf("port:%d\n",port_num);
 
@@ -358,13 +358,20 @@ void send_data(TRANSMIT_DATA *td, char *server_ip, int port_num, ACK_DATA* ack, 
     else if(send_data_type==ACK_INFO)
         data_size=sizeof(ACK_DATA);
 
-    else 
+    else
         data_size=sizeof(CMD_DATA);
 
     char* send_buff=(char*)malloc(data_size);
 
     if(send_data_type==UPDT_DATA)
+    {
+        //ggw
+        //printf("send_data: td->sentip=%s\n",td->sent_ip);
+        //ggw
+        strcpy(td->sent_ip,server_ip);
         memcpy(send_buff, td, sizeof(TRANSMIT_DATA));
+    }
+        
 
     else if(send_data_type==ACK_INFO)
         memcpy(send_buff, ack, sizeof(ACK_DATA));
@@ -387,7 +394,7 @@ void send_data(TRANSMIT_DATA *td, char *server_ip, int port_num, ACK_DATA* ack, 
         exit(1);
     }
     server_addr.sin_port = htons(port_num);
-	
+
 	int x=-10;
     while(x<0)
 	{
@@ -402,7 +409,7 @@ void send_data(TRANSMIT_DATA *td, char *server_ip, int port_num, ACK_DATA* ack, 
 		server_addr.sin_port = htons(port_num);
 	}
 	//printf("connect succeed\n");
-	
+
     sent_len=0;
     while(sent_len < data_size){
         ret=write(client_socket, send_buff+sent_len, data_size-sent_len);
@@ -413,7 +420,7 @@ void send_data(TRANSMIT_DATA *td, char *server_ip, int port_num, ACK_DATA* ack, 
     ret=close(client_socket);
     if(ret==-1)
         perror("close_send_data_socket error!\n");
-	
+
 	//printf("finish send to ip=%s\n",server_ip);
 
 }
@@ -421,9 +428,9 @@ void send_data(TRANSMIT_DATA *td, char *server_ip, int port_num, ACK_DATA* ack, 
 
 // this function is executed by the internal node, which send the aggregated data delta to the parity node for final encoding
 void send_req(UPDT_REQ_DATA* req, char* server_ip, int port_num, META_INFO* metadata, int info_type){
-	
+
 	//printf("send req to ip=%s\n",server_ip);
-	
+
     int sent_len;
     int ret;
     int client_socket;
@@ -554,7 +561,7 @@ int update_loged_chunks(int given_chunk_id){
 
 		printf("ERR: entry_per_bucket is too small\n");
 		return -1;
-		
+
 		}
 
     // record the given_chunk_id
@@ -568,7 +575,7 @@ int update_loged_chunks(int given_chunk_id){
 
 /*
  * this function transforms a char type to an integer type
- */ 
+ */
 void trnsfm_char_to_int(char *char_data, long long *data){
 
     int i=0;
@@ -585,8 +592,8 @@ void trnsfm_char_to_int(char *char_data, long long *data){
 
 
 
-/* 
- * this function truncates a component from a string according to a given divider 
+/*
+ * this function truncates a component from a string according to a given divider
  */
 void new_strtok(char string[], char divider, char result[]){
 
@@ -620,9 +627,9 @@ void new_strtok(char string[], char divider, char result[]){
 
 
 
-/* 
+/*
  * generate a random string for the given length
- */ 
+ */
 void gene_radm_buff(char* buff, int len){
 
     int i;
@@ -634,7 +641,7 @@ void gene_radm_buff(char* buff, int len){
 
 /*
  * count the number of non-negatives in an array
- */ 
+ */
 int count_non_ngtv(int* arr, int len){
 
 
@@ -678,7 +685,7 @@ int get_local_chunk_id(int stripe_id){
     }
 
     // we promise that the chunk_id exists, as we always select a node that has that chunk for partial encoding
-    local_data_chunk_id=stripe_id*data_chunks+i; 
+    local_data_chunk_id=stripe_id*data_chunks+i;
 
     return local_data_chunk_id;
 
@@ -705,7 +712,7 @@ void get_chunk_store_order(){
                 // use "GLOBAL" order to represent store order of "ALL" chunks
                 if(global_chunk_map[i*num_chunks_in_stripe+j]==k){
 
-                    chunk_store_order[k*max_num_store_chunks+num_store_chunks[k]]=i*num_chunks_in_stripe+j; 
+                    chunk_store_order[k*max_num_store_chunks+num_store_chunks[k]]=i*num_chunks_in_stripe+j;
                     num_store_chunks[k]++;
 
                     if(num_store_chunks[k]>max_num_store_chunks) {
@@ -741,7 +748,7 @@ void bitwiseXor(char* result, char* srcA, char* srcB, int length) {
 }
 
 
-/* 
+/*
  * for each received chunk, this function adds them together and outputs a aggregated result
  */
 void aggregate_data(char* data_delta, int num_recv_chnks, char* ped){
@@ -804,13 +811,13 @@ void flush_new_data(int stripe_id, char* new_data, int global_chunk_id, int stor
 }
 
 /*
- * This function listens an ack 
- */ 
+ * This function listens an ack
+ */
 void listen_ack(ACK_DATA* ack, char* recv_buff, int stripe_id, int updt_dt_id, int updt_prty_id, int port_num, int op_type){
-	
+
 	//printf("listen_ack begin\n");
-	
-    int recv_len; 
+
+    int recv_len;
     int read_size;
     int ntf_connfd;
     int ntf_socket;
@@ -827,22 +834,22 @@ void listen_ack(ACK_DATA* ack, char* recv_buff, int stripe_id, int updt_dt_id, i
         printf("Failed to listen.\n");
         exit(1);
     }
-	
+
 	//printf("listen_ack: accept begin\n");
     ntf_connfd = accept(ntf_socket, (struct sockaddr*)&sender_addr, &length);
 	//printf("listen_ack: accept finish\n");
-	
+
 
     recv_len=0;
-	
-	//printf("listen_ack: while begin\n"); 
+
+	//printf("listen_ack: while begin\n");
     while(recv_len<sizeof(ACK_DATA)){
 
         read_size = read(ntf_connfd, recv_buff+recv_len, sizeof(ACK_DATA)-recv_len);
         recv_len+=read_size;
 
     }
-    //printf("listen_ack: while finish\n"); 
+    //printf("listen_ack: while finish\n");
 
 
     close(ntf_connfd);
@@ -856,7 +863,7 @@ void listen_ack(ACK_DATA* ack, char* recv_buff, int stripe_id, int updt_dt_id, i
 
 }
 
-/* 
+/*
  * the parity chunks in every stripe are encoded by using the same matrix
  * this function returns the encoding coefficient for a given chunk
  */
@@ -886,7 +893,7 @@ void encode_data(char* data, char* pse_coded_data, int chunk_id, int updt_prty){
  */
 void send_ack(int stripe_id, int dt_id, int prty_id, char* destined_ip, int port_num, int op_type){
 
-    int node_id; 
+    int node_id;
     int des_node_id;
     int rack_id;
     int des_rack_id;
@@ -902,7 +909,7 @@ void send_ack(int stripe_id, int dt_id, int prty_id, char* destined_ip, int port
     ack->port_num=port_num;
     strcpy(ack->next_ip, destined_ip);
 
-    // if the destination node is the client node or mds, then send the ack to the gateway if the gateway is opened 
+    // if the destination node is the client node or mds, then send the ack to the gateway if the gateway is opened
     if(strcmp(destined_ip, client_ip)==0 || strcmp(destined_ip, mt_svr_ip)==0){
 
         memcpy(ack->next_ip, destined_ip, ip_len);
@@ -910,7 +917,7 @@ void send_ack(int stripe_id, int dt_id, int prty_id, char* destined_ip, int port
         if(GTWY_OPEN)
             send_data(NULL, gateway_ip, SERVER_PORT, ack, NULL, ACK_INFO);
 
-        else 
+        else
             send_data(NULL, ack->next_ip, port_num, ack, NULL, ACK_INFO);
 
         return;
@@ -929,7 +936,7 @@ void send_ack(int stripe_id, int dt_id, int prty_id, char* destined_ip, int port
     if((GTWY_OPEN==1) && (des_rack_id!=rack_id))
         send_data(NULL, gateway_ip, SERVER_PORT, ack, NULL, ACK_INFO);
 
-    else 
+    else
         send_data(NULL, ack->next_ip, port_num, ack, NULL, ACK_INFO);
 
     free(ack);
@@ -938,7 +945,7 @@ void send_ack(int stripe_id, int dt_id, int prty_id, char* destined_ip, int port
 
 
 /*
- * given a node_id and a global_chunk_id, return the storage index of that chunk on that node 
+ * given a node_id and a global_chunk_id, return the storage index of that chunk on that node
  * the storage index is to calculate the offset of the stored data on that node
  */
 int locate_store_index(int node_id, int global_chunk_id){
@@ -995,7 +1002,7 @@ int locate_store_index(int node_id, int global_chunk_id){
 
 
 
-/* 
+/*
  * receive the data and copy the buffer to a desinated area
  */
 void* data_mvmnt_process(void* ptr){
@@ -1016,7 +1023,7 @@ void* data_mvmnt_process(void* ptr){
 
     }
 
-    // copy the data 
+    // copy the data
     TRANSMIT_DATA* td=malloc(sizeof(TRANSMIT_DATA));
     memcpy(td, recv_buff, sizeof(TRANSMIT_DATA));
 
@@ -1076,7 +1083,7 @@ void* recv_data_process(void* ptr){
  * if @flag_tag=2, then it performs data_mvmnt_process
  */
 void para_recv_data(int stripe_id, int num_recv_chnks, int port_num, int flag_tag){
-	
+
 	//printf("para_recv_data begin\n");
 
     int i;
@@ -1107,7 +1114,7 @@ void para_recv_data(int stripe_id, int num_recv_chnks, int port_num, int flag_ta
 
 
     while(1){
-		
+
 		//printf("index=%d\n",index);
         connfd[index] = accept(server_socket, (struct sockaddr*)&sender_addr,&length);
 		//printf("accept:%s\n",inet_ntoa(sender_addr.sin_addr));
@@ -1117,7 +1124,7 @@ void para_recv_data(int stripe_id, int num_recv_chnks, int port_num, int flag_ta
         if(flag_tag==1)
             pthread_create(&recv_data_thread[index], NULL, recv_data_process, (void *)(rpd+index));
 
-        else 
+        else
             pthread_create(&recv_data_thread[index], NULL, data_mvmnt_process, (void *)(rpd+index));
         index++;
 
@@ -1180,8 +1187,8 @@ void read_old_data(char* read_buff, int store_index){
  */
 void write_new_data(char* write_buff, int store_index){
 
-    int fd; 
-    int ret; 
+    int fd;
+    int ret;
     char* tmp_buff=NULL;
 
     ret=posix_memalign((void **)&tmp_buff, getpagesize(), chunk_size);
@@ -1196,7 +1203,7 @@ void write_new_data(char* write_buff, int store_index){
     fd=open("data_file", O_RDWR);
     lseek(fd, store_index*chunk_size, SEEK_SET);
 
-    // write the new data 
+    // write the new data
     ret=write(fd, tmp_buff, chunk_size);
     if(ret!=chunk_size){
         printf("write data error!\n");
@@ -1211,7 +1218,7 @@ void write_new_data(char* write_buff, int store_index){
 
 
 /*
- * a thread receives ack 
+ * a thread receives ack
  */
 void* recv_ack_process(void* ptr){
 
@@ -1281,6 +1288,7 @@ void para_recv_ack(int stripe_id, int num_recv_chnks, int port_num){
     if(num_recv_chnks > data_chunks){
 
         printf("ERROR: num_of_threads is not enough!\n");
+        printf("num_recv_chnks=%d data_chunks=%d\n",num_recv_chnks,data_chunks);
         exit(1);
 
     }
@@ -1305,7 +1313,7 @@ void para_recv_ack(int stripe_id, int num_recv_chnks, int port_num){
 
         pthread_create(&recv_data_thread[index], NULL, recv_ack_process, (void *)(rpd+index));
 
-        // if receiving enough data 
+        // if receiving enough data
         index++;
         if(index>=num_recv_chnks)
             break;
@@ -1326,11 +1334,15 @@ void para_recv_ack(int stripe_id, int num_recv_chnks, int port_num){
 
 
 /*
- * it generates a thread to send data 
- */ 
+ * it generates a thread to send data
+ */
 void* send_updt_data_process(void* ptr){
 
     TRANSMIT_DATA td = *(TRANSMIT_DATA *)ptr;
+
+    //ggw
+    //printf("ptr->sentip=%s\n",ptr.sent_ip);
+    //printf("send_updt_data_process:td->sentip=%s\n",td.sent_ip);
 
     send_data((TRANSMIT_DATA *)ptr, td.sent_ip, td.port_num, NULL, NULL, UPDT_DATA);
 
@@ -1343,7 +1355,7 @@ void* send_updt_data_process(void* ptr){
  */
 void para_send_dt_prty(TRANSMIT_DATA* td, int op_type, int num_updt_prty, int send_port, int ack_port){
 
-    int j; 
+    int j;
     int prty_node_id;
     int prty_rack_id;
     int node_id;
@@ -1362,7 +1374,7 @@ void para_send_dt_prty(TRANSMIT_DATA* td, int op_type, int num_updt_prty, int se
 
         // initialize td structure
         td_mt[j].send_size=sizeof(TRANSMIT_DATA);
-        td_mt[j].op_type=op_type; 
+        td_mt[j].op_type=op_type;
         td_mt[j].data_chunk_id=td->data_chunk_id;
         td_mt[j].stripe_id=td->stripe_id;
         td_mt[j].num_recv_chks_itn=-1;
@@ -1371,7 +1383,7 @@ void para_send_dt_prty(TRANSMIT_DATA* td, int op_type, int num_updt_prty, int se
         td_mt[j].updt_prty_id=j;
         memcpy(td_mt[j].buff, td->buff, sizeof(char)*chunk_size);
 
-        prty_node_id=td->updt_prty_nd_id[j]; 
+        prty_node_id=td->updt_prty_nd_id[j];
         prty_rack_id=get_rack_id(prty_node_id);
 
         // if send data across racks, we have to check if the gateway is opened
@@ -1380,14 +1392,14 @@ void para_send_dt_prty(TRANSMIT_DATA* td, int op_type, int num_updt_prty, int se
             memcpy(td_mt[j].next_ip, node_ip_set[prty_node_id], ip_len);
         }
 
-        else 
+        else
             memcpy(td_mt[j].sent_ip, node_ip_set[prty_node_id], ip_len);
 
         pthread_create(&parix_updt_thread[j], NULL, send_updt_data_process, td_mt+j);
 
     }
 
-    // parallel receive data 
+    // parallel receive data
     para_recv_ack(td->stripe_id, num_updt_prty, ack_port);
 
     // join the threads
@@ -1403,7 +1415,7 @@ void para_send_dt_prty(TRANSMIT_DATA* td, int op_type, int num_updt_prty, int se
  * append a data chunk to the end of a file
  */
 void log_write(char* filename, TRANSMIT_DATA* td){
-	
+
 	//printf("log_write begin\n");
 
     int ret;
@@ -1428,9 +1440,9 @@ void log_write(char* filename, TRANSMIT_DATA* td){
         perror("write_log_file_error!\n");
         exit(1);
     }
-	
+
 	//printf("log_write end\n");
-	
+
     free(tmp_buff);
     close(fd);
 
@@ -1531,7 +1543,7 @@ void read_log_data(int local_chunk_id, char* log_data, char* filename){
  */
 void evict_log_dt(int* log_table, int logcal_data_id){
 
-    int i; 
+    int i;
     int bucket_id;
 
     bucket_id=logcal_data_id%bucket_num;
@@ -1552,7 +1564,7 @@ void evict_log_dt(int* log_table, int logcal_data_id){
 
 /*
  * This function is performed by the client to receive the metadata from the metadata server
- */ 
+ */
 void recv_metadata(META_INFO* metadata, int port_num){
 
     int server_socket;
@@ -1589,10 +1601,10 @@ void recv_metadata(META_INFO* metadata, int port_num){
 
         }
 
-        // copy the data in buff 
+        // copy the data in buff
         memcpy(metadata, recv_buff, sizeof(META_INFO));
 
-        // close the connection 
+        // close the connection
         close(connfd);
 
         break;
@@ -1606,21 +1618,21 @@ void recv_metadata(META_INFO* metadata, int port_num){
 
 
 
-/* 
+/*
  * this function is executed by the client to connect the metadata server for data update
  */
 void connect_metaserv(int chunk_id, META_INFO* metadata, int end){
-	
+
     int send_chunk_id;
 	int temp;
-	
+
     UPDT_REQ_DATA* req=(UPDT_REQ_DATA*)malloc(sizeof(UPDT_REQ_DATA));
 
     req->op_type=UPDT_REQ;
-	
+
 	temp=stripe_num*data_chunks;
 	send_chunk_id=chunk_id%temp;
-	
+
     req->local_chunk_id=send_chunk_id;
 	req->end=end;
 

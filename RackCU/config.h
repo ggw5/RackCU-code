@@ -6,16 +6,16 @@
 
 // ======================== Fill the erasure coding parameters ====================
 /* erasure coding settings */
-#define data_chunks           12 //k of (n, k)
-#define num_chunks_in_stripe  16 //n of (n, k)
+#define data_chunks           4 //k of (n, k)
+#define num_chunks_in_stripe  8 //n of (n, k)
 #define chunk_size            4*1024 //in bytes
 
 // ======================== Fill the architecture parameters ====================
 
 /* configurations of the data center */
-#define total_nodes_num       16 //The total number of nodes in the cluster, and we set it to be the same as n in the erasure code parameter (n, k)
+#define total_nodes_num       8 //The total number of nodes in the cluster, and we set it to be the same as n in the erasure code parameter (n, k)
 #define max_chunks_per_rack   2  //Maximum number of nodes per rack
-#define rack_num              8  //Number of racks
+#define rack_num              4  //Number of racks
 #define node_num_per_rack     total_nodes_num/rack_num //we currently assume that each rack is composed of a constant number of nodes
 
 // ============================= END ==============================================
@@ -51,7 +51,7 @@
 
 /* the operation type used in transmission  */
 #define DATA_UPDT             1
-#define DATA_PE               2 //it happens when the internal node commits the pse data to the parity node 
+#define DATA_PE               2 //it happens when the internal node commits the pse data to the parity node
 #define DATA_COMMIT           3
 #define DELTA                 4 //it happens when the leaf node commits its data delta to the internal node
 #define CMMT_CMLT             5 //it means that the commit is completed
@@ -95,7 +95,7 @@
 #define PARITY_DELTA_APPR     2
 #define DIRECT_APPR           3
 
-/*the port number*/ 
+/*the port number*/
 #define MAX_PORT_NUM          65535
 #define MIN_PORT_NUM          1111
 #define NO_DEFINED_PORT       -1
@@ -131,15 +131,16 @@ typedef struct _transmit_data{
     int prty_delta_app_role; //the role is fixed for a given commit approach
     int data_delta_app_prty_role; //if a parity chunk is an internal node in a rack, then it will always be the internal node in the data-delta approach
     int chunk_store_index;
-    int updt_prty_nd_id[num_chunks_in_stripe-data_chunks]; 
+    int updt_prty_nd_id[num_chunks_in_stripe-data_chunks];
     int updt_prty_store_index[num_chunks_in_stripe-data_chunks];
     int commit_app[num_chunks_in_stripe-data_chunks];        //parity-delta-first or data-delta-first
     int parix_updt_data_id[data_chunks];                     //used to record the number of updated chunks in a stripe
+    int intnl_node_for_rack[rack_num];
     char next_ip[ip_len];
-    char sent_ip[ip_len]; //the ip addr to send the data 
-    char from_ip[ip_len]; //record the ip addr of the sender 
+    char sent_ip[ip_len]; //the ip addr to send the data
+    char from_ip[ip_len]; //record the ip addr of the sender
     char next_dest[num_chunks_in_stripe-data_chunks][ip_len]; //it records the next dest ip addr to send the td->buff in the m parity chunks' renewals
-    //for example, the next_addr of the leaf node in parity delta approach should the internal node 
+    //for example, the next_addr of the leaf node in parity delta approach should the internal node
     char buff[chunk_size];
 }TRANSMIT_DATA;
 
@@ -151,7 +152,7 @@ typedef struct _aggt_send_data{
     int updt_prty_id;
     int data_delta_num;
     char next_ip[ip_len];
-    int recv_delta_id[data_chunks]; 
+    int recv_delta_id[data_chunks];
     int commit_app[num_chunks_in_stripe-data_chunks];        //parity-delta-first or data-delta-first
     char data_delta[chunk_size];
 
@@ -184,15 +185,16 @@ typedef struct _cmd_data{
     int prty_delta_app_role; //the role is fixed for a given commit approach
     int data_delta_app_prty_role; //if a parity chunk is an internal node in a rack, then it will always be the internal node in the data-delta approach
     int chunk_store_index;
-    int updt_prty_nd_id[num_chunks_in_stripe-data_chunks]; 
+    int updt_prty_nd_id[num_chunks_in_stripe-data_chunks];
     int updt_prty_store_index[num_chunks_in_stripe-data_chunks];
     int commit_app[num_chunks_in_stripe-data_chunks];        //parity-delta-first or data-delta-first
     int parix_updt_data_id[data_chunks];                     //used to record the number of updated chunks in a stripe
+    int intnl_node_for_rack[rack_num];
     char next_ip[ip_len];
-    char sent_ip[ip_len]; //the ip addr to send the data 
-    char from_ip[ip_len]; //record the ip addr of the sender 
+    char sent_ip[ip_len]; //the ip addr to send the data
+    char from_ip[ip_len]; //record the ip addr of the sender
     char next_dest[num_chunks_in_stripe-data_chunks][ip_len]; //it records the next dest ip addr to send the td->buff in the m parity chunks' renewals
-    //for example, the next_addr of the leaf node in parity delta approach should the internal node 
+    //for example, the next_addr of the leaf node in parity delta approach should the internal node
 }CMD_DATA;
 
 
@@ -211,7 +213,7 @@ typedef struct _meta_info{
     int data_chunk_id;
     int port_num;
     int chunk_store_index;
-    int updt_prty_nd_id[num_chunks_in_stripe-data_chunks]; 
+    int updt_prty_nd_id[num_chunks_in_stripe-data_chunks];
     int updt_prty_store_index[num_chunks_in_stripe-data_chunks];
     int if_first_update;
     char next_ip[ip_len];
@@ -222,14 +224,14 @@ typedef struct _meta_info{
 
 typedef struct _recv_process_data{//it is used in receive data by multiple threads
 
-    int connfd; 
+    int connfd;
     int recv_id;
 
 }RECV_PROCESS_DATA;
 
 typedef struct _recv_process_prty{//it is used in receive data by multiple threads
 
-    int connfd; 
+    int connfd;
     int recv_id;
     int prty_delta_role;
     int prty_nd_id;

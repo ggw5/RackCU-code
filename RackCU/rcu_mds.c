@@ -629,7 +629,8 @@ int get_first_prty_nd_id(int prty_rack_id, int stripe_id)
 void cau_commit(int num_rcrd_strp)
 {
 
-	printf("++++parity commit starts:+++++\n");
+	//printf("++++parity commit starts:+++++\n");
+	//printf("update stripe num = %d\n",num_rcrd_strp);
 
 	int index;
 	int i,j,k;
@@ -670,7 +671,7 @@ void cau_commit(int num_rcrd_strp)
 		
 		updt_stripe_id=mark_updt_stripes_tab[i*(data_chunks+1)];
 
-		printf("Stripe %d Commit:\n", updt_stripe_id);
+		//printf("Stripe %d Commit:\n", updt_stripe_id);
 
 		memset(rack_has_prty, 0, sizeof(int)*rack_num);
 
@@ -810,17 +811,17 @@ void cau_commit(int num_rcrd_strp)
 		}
 
 		//printf("ar choose finish\n");
-		/*if(data_or_prty_ar==0)
-			printf("ar is data\n");
-		else if(data_or_prty_ar==1)
-		{
-			printf("ar is parity\n");
-		}
-		else
-		{
-			printf("ar node error\n");
-			exit(1);
-		}*/
+		// if(data_or_prty_ar==0)
+		// 	printf("ar is data\n");
+		// else if(data_or_prty_ar==1)
+		// {
+		// 	printf("ar is parity\n");
+		// }
+		// else
+		// {
+		// 	printf("ar node error\n");
+		// 	exit(1);
+		// }
 		if(data_or_prty_ar==-1)
 		{
 			printf("ar node error\n");
@@ -1050,11 +1051,18 @@ void cau_commit(int num_rcrd_strp)
 					tcd_prty[j].num_recv_chks_itn=total_updt_dt_num;
 					//tcd_prty[j].prty_delta_app_role=DATA_INTERNAL;
 					tcd_prty[j].data_delta_app_prty_role=PARITY_AR;
+					tcd_prty[j].updt_prty_nd_id[j]=prty_node_id;
 					break;
 				}
 			}
 
 
+            //ggw
+			for(k=0;k<rack_num;k++)
+			{
+				tcd_prty[j].intnl_node_for_rack[k]=intnl_nds[k];
+			}
+			
 			// compare total_updt_dt_num to the number of parity nodes in parity rack to determine the commit approach
 			for(k=0; k<num_chunks_in_stripe-data_chunks; k++)
 			{
@@ -1076,6 +1084,8 @@ void cau_commit(int num_rcrd_strp)
 				prty_num=prty_num_in_racks[h];
 				tcd_prty[j].updt_prty_nd_id[k]=prty_node_id;
 
+				//printf("prty_node_id=%d\n",prty_node_id);
+
 				// initialize the configurations in parity-delta commit and data-delta commit in the k-th parity chunk's commit
 				// we choose parity-delta commit
 				if((total_updt_dt_num >= prty_num) && (ar_rack_id!=prty_rack_id))
@@ -1091,9 +1101,14 @@ void cau_commit(int num_rcrd_strp)
 				{
 					tcd_prty[k].num_recv_chks_prt=total_updt_dt_num;
 					tcd_prty[j].commit_app[k]=DATA_DELTA_APPR;
+
 					// the next ip addr is the internal node of parity nodes
 					prty_intl_nd=intnl_nds[prty_rack_id];
-					memcpy(tcd_prty[j].next_dest[k], node_ip_set[prty_intl_nd], ip_len);
+					if(prty_node_id==prty_intl_nd)
+					{
+						memcpy(tcd_prty[j].next_dest[k], node_ip_set[prty_intl_nd], ip_len);
+					}
+					    
 
 				}
 				else if(ar_rack_id==prty_rack_id)

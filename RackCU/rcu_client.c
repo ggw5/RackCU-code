@@ -232,7 +232,7 @@ void cau_read_trace(char *trace_name){
 	throughout=total_updatesize/(total_time/1000000);
 	printf("total_updatesize=%lf\n",total_updatesize);
 	printf("total_time=%lf\n",total_time);
-	printf("Throughout=%lf KB/s\n",throughout);
+	printf("Throughput=%lf KB/s\n",throughout);
 	
 	if((fpt=fopen("throughout//rcu.txt","a"))==NULL)
     {

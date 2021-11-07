@@ -410,16 +410,20 @@ void* prty_recv_data_process(void* ptr)
 	memcpy(td, recv_buff, sizeof(TRANSMIT_DATA));
 
 	prty_rack_id=get_rack_id(rpp.prty_nd_id);
+	//printf("rpp.prty_nd_id=%d\n",rpp.prty_nd_id);
 
 	// judge the commit_approach
 	//td 从data node接收到的data delta，其中包含selective update的选择
 	if(td->commit_app[td->updt_prty_id]==DATA_DELTA_APPR)
 	{
+		//printf("DATA_DELTA_APPR\n");
 
 		// if the parity node is the internal node (i.e., the parity node to receive deltas of data nodes from other racks)
 		// then forward the deltas to other parity nodes within the rack
-		if(data_delta_role==PRTY_INTERNAL)
+		if(td->intnl_node_for_rack[prty_rack_id]==rpp.prty_nd_id)
 		{
+			//ggw
+			//printf("PRTY_INTERNAL\n");
 
 			pthread_t send_mt[num_chunks_in_stripe-data_chunks];
 
@@ -431,21 +435,43 @@ void* prty_recv_data_process(void* ptr)
 			{
 
 				tmp_prty_node_id=td->updt_prty_nd_id[i];
+				
 				tmp_prty_rack_id=get_rack_id(tmp_prty_node_id);
 
 				// if the parity node is in other racks, then continue
 				if(prty_rack_id!=tmp_prty_rack_id)
+				{
+					//ggw
+					//printf("prty_rack_id!=tmp_prty_rack_id\n");
+					//printf("%d %d\n",prty_rack_id,tmp_prty_rack_id);
 					continue;
+				}
+					
 
 				// if the parity node is this node, then continue
 				if(tmp_prty_node_id==rpp.prty_nd_id)
+				{
+					//ggw
+					//printf("continue 1\n");
 					continue;
+				}
+					
 
 				// initialize send_td[count] and send the data delta to the parity nodes within the same rack in parallel
 				memcpy(send_td+count, td, sizeof(TRANSMIT_DATA));
+				//printf("11\n");
+				//ggw
+				//printf("node id=%d\n",tmp_prty_node_id);
+				//printf("ip------%s\n",node_ip_set[tmp_prty_node_id]);
 				memcpy(send_td[count].sent_ip, node_ip_set[tmp_prty_node_id], ip_len);
+				//printf("2\n");
 				send_td[count].updt_prty_id=i;
+				//printf("3\n");
 				send_td[count].port_num=SERVER_PORT+data_chunks+i;
+				//printf("4\n");
+
+				//ggw
+				//printf("send to %s\n",node_ip_set[tmp_prty_node_id]);
 
 				pthread_create(&send_mt[count], NULL, send_updt_data_process, (void *)(send_td+count));
 
@@ -508,14 +534,25 @@ void cau_prty_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 	memcpy(local_ip, td->sent_ip, ip_len);
 
 	// find the parity node id 通过ip地址匹配找到node id
+	//ggw
+	//GetLocalIp(local_ip);
 	for(i=0; i<total_nodes_num; i++)
 	{
 		if(strcmp(node_ip_set[i], local_ip)==0)
 			break;
 	}
 
+	//ggw
+	//printf("local_ip=%s\n",local_ip);
+	//printf("prty_node_id=%d\n",prty_node_id);
+
 
 	prty_node_id=i;
+
+	//ggw: get local ip from NIC;
+	prty_node_id=get_local_node_id();
+	strcpy(local_ip,node_ip_set[prty_node_id]);
+	//prty_rack_id=get_rack_id(prty_node_id);
 
 	// read old parity
 	read_old_data(new_prty, td->chunk_store_index);
@@ -528,6 +565,9 @@ void cau_prty_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 	// init the sender info
 	struct sockaddr_in sender_addr;
 	socklen_t length=sizeof(sender_addr);
+
+	//ggw
+	//printf("num_recv_chks_prt=%d\n",td->num_recv_chks_prt);
 
 	if(listen(server_socket,td->num_recv_chks_prt) == -1)
 	{
@@ -555,6 +595,9 @@ void cau_prty_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 
 		// receive deltas in parallell
 		pthread_create(&pthread_mt[index], NULL, prty_recv_data_process, (void *)(rpp+index));
+
+		//ggw
+		//printf("finish prty_recv_data_process\n");
 
 
 		// if receive enough deltas, then break
@@ -584,7 +627,7 @@ void cau_prty_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 
 	// send ack to the metadata server
 	send_ack(td->stripe_id, td->data_chunk_id, td->updt_prty_id, mt_svr_ip, CMMT_PORT, CMMT_CMLT);
-	printf("Stripe-%d: Parity Node: Commit Completes in A Stripe!\n", td->stripe_id);
+	//printf("Stripe-%d: Parity Node: Commit Completes in A Stripe!\n", td->stripe_id);
 
 	free(new_prty);
 	free(pthread_mt);
@@ -635,6 +678,8 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 	// get the node info and rack info
 	memcpy(local_ip, td->sent_ip, ip_len);
 
+    //ggw
+	//GetLocalIp(local_ip);
 	// find the parity node id 通过ip地址匹配找到node id
 	for(i=0; i<total_nodes_num; i++)
 	{
@@ -642,8 +687,12 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 			break;
 	}
 
-
 	prty_node_id=i;
+	prty_rack_id=get_rack_id(prty_node_id);
+
+	//ggw: get local ip from NIC;
+	prty_node_id=get_local_node_id();
+	strcpy(local_ip,node_ip_set[prty_node_id]);
 	prty_rack_id=get_rack_id(prty_node_id);
 	
 	//收data delta
@@ -672,12 +721,23 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 		node_id=td->updt_prty_nd_id[prty_id];
 		cddt_rack_id=get_rack_id(node_id);
 
+		//ggw
+		if(node_id==prty_node_id)
+		{
+			//printf("its me\n");
+			//printf("me is node %d\n",prty_node_id);
+			continue;
+		}
+		
+
 		/*// if the candidate rack is not the parity rack we focus on
 		if(cddt_rack_id!=updt_prty_rack_id)
 			continue;*/
 
 		if(td->commit_app[prty_id]==PARITY_DELTA_APPR)
 		{
+			//ggw
+			//printf("parity delta\n");
 
 			//asd[prty_id].this_data_id=chunk_id;
 			//memcpy(asd[prty_id].data_delta, data_delta, chunk_size);
@@ -745,6 +805,10 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 
 	TRANSMIT_DATA* send_td=(TRANSMIT_DATA*)malloc(sizeof(TRANSMIT_DATA)*(num_chunks_in_stripe-data_chunks));
 
+
+    //ggw
+	//int j1;
+
 	//find the parity chunks in that rack
 	count=0;
 	for(i=0; i<num_chunks_in_stripe-data_chunks; i++)
@@ -754,6 +818,7 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 			//printf("data delta\n");
 			tmp_prty_node_id=td->updt_prty_nd_id[i];
 	        tmp_prty_rack_id=get_rack_id(tmp_prty_node_id);
+			//printf("tmp_prty_node_id=%d\n",tmp_prty_node_id);
 
 		    // if the parity node is in other racks, then continue
 		    //if(prty_rack_id!=tmp_prty_rack_id)
@@ -762,11 +827,29 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 		    // if the parity node is this node, then continue
 		    if(tmp_prty_node_id==prty_node_id)
 			    continue;
+			
+			//ggw
+			if(tmp_prty_node_id!=td->intnl_node_for_rack[tmp_prty_rack_id])
+			{
+				//printf("not internal node for rack\n");
+				continue;
+			}
+
 
 		    // initialize send_td[count] and send the data delta to the parity nodes within the same rack in parallel
 		    memcpy(send_td+count, td, sizeof(TRANSMIT_DATA));
+			//ggw
+			//printf("node_ip_set[%d]=%s\n",tmp_prty_node_id,node_ip_set[tmp_prty_node_id]);
 		    memcpy(send_td[count].sent_ip, node_ip_set[tmp_prty_node_id], ip_len);
+			//ggw
+			//printf("send_td[count].sent_ip=%s\n",send_td[count].sent_ip);
+
 		    send_td[count].updt_prty_id=i;
+			//ggw
+			//for(j1=0; j1<num_chunks_in_stripe-data_chunks; j1++)
+			//{
+				//printf("send_td[count].updt_prty_nd_id[%d]=%d\n",j1,send_td[count].updt_prty_nd_id[j1]);
+			//}
 		    send_td[count].port_num=SERVER_PORT+data_chunks+i;
 
 		    pthread_create(&send_mt[count], NULL, send_updt_data_process, (void *)(send_td+count));
@@ -812,7 +895,7 @@ void parity_ar_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 
 	// send ack to the metadata server
 	send_ack(td->stripe_id, td->data_chunk_id, td->updt_prty_id, mt_svr_ip, CMMT_PORT, CMMT_CMLT);
-	printf("Stripe-%d: Parity Node: Commit Completes in A Stripe!\n", td->stripe_id);
+	//printf("Stripe-%d: Parity Node: Commit Completes in A Stripe!\n", td->stripe_id);
 
 	free(new_prty);
 	free(pthread_mt);
@@ -835,7 +918,7 @@ void cau_server_commit(CMD_DATA* cmd)
 	memcpy(td, cmd, sizeof(CMD_DATA));
 	td->send_size=sizeof(TRANSMIT_DATA);
 
-	printf("Stripe-%d Commit Starts:\n", td->stripe_id);
+	//printf("Stripe-%d Commit Starts:\n", td->stripe_id);
 
 	int   local_chunk_id;
 	int   its_stripe_id;
@@ -844,6 +927,9 @@ void cau_server_commit(CMD_DATA* cmd)
 	int   prty_cmmt;
 	int   prty_rack_id;
 	int   server_socket;
+
+	//ggw
+	//printf("sent ip=%s\n",cmd->sent_ip);
 
 	server_socket=init_server_socket(SERVER_PORT+td->updt_prty_id+data_chunks);
 
@@ -889,7 +975,7 @@ void cau_server_commit(CMD_DATA* cmd)
 		return;
 	}
 
-	printf("DATA NODE:\n");
+	//printf("DATA NODE:\n");
 
 	// calculate data delta
 	cau_read_cal_data_delta(td->stripe_id, data_delta, local_chunk_id, td->chunk_store_index);
@@ -909,7 +995,7 @@ void cau_server_commit(CMD_DATA* cmd)
 			if(td->commit_app[prty_cmmt]==DATA_DELTA_APPR)
 			{
 
-				printf("#DATA_DELTA COMMIT APPR:\n");
+				//printf("#DATA_DELTA COMMIT APPR:\n");
 				
 				/*
 				// if the parity chunks in that rack have been committed
@@ -1184,7 +1270,11 @@ int main(int argc, char** argv)
 		}
 
 		if(td->op_type==DATA_UPDT && recv_data_type==UPDT_DATA)
+		{
+			//printf("update\n");
 			cau_server_updte(td);
+		}
+			
 
 		else if(td->op_type==DATA_LOG && recv_data_type==UPDT_DATA) //this is performed at the parity chunk side
 		{
@@ -1200,7 +1290,11 @@ int main(int argc, char** argv)
 		}
 
 		else if(cmd->op_type==DATA_COMMIT && recv_data_type==CMD_INFO)
+		{
+			//printf("commit\n");
 			cau_server_commit(cmd);
+		}
+			
 
 		else if(cmd->op_type==CMD_MVMNT && recv_data_type==CMD_INFO)
 			cau_send_mvm_data(cmd);

@@ -40,6 +40,7 @@ void init_parix_fo_gen_chunk_distrbtn(){
     srand((unsigned int)time(0));
 
     for(i=0; i<stripe_num; i++){
+        //printf("i=%d\n",i);
 
         memset(chunk_to_node, -1, sizeof(int)*num_chunks_in_stripe);
         memset(num_chunk_in_rack, 0, sizeof(int)*rack_num);
@@ -56,6 +57,16 @@ void init_parix_fo_gen_chunk_distrbtn(){
         base=total_nodes_num;
 		
         for(j=0; j<num_chunks_in_stripe; j++){//对条带内每个chunk分配所在node，填写rack_id
+            // if(j==12)
+            // {
+            //     printf("chunk j=%d\n",j);
+            //     for(t=0;t<rack_num;t++)
+            //     {
+            //         printf("rack_d_or_p[%d]=%d ",t,rack_d_or_p[t]);
+            //     }
+            //         printf("\n");
+            //     exit(0);         
+            // }
 
 
             rank=rand()%base;
@@ -84,6 +95,11 @@ void init_parix_fo_gen_chunk_distrbtn(){
 			{
 				if(rack_d_or_p[rack_id]==0)
 				{
+                    // for(t=0;t<rack_num;t++)
+                    // {
+                    //     printf("rack_d_or_p[%d]=%d ",t,rack_d_or_p[t]);
+                    // }
+                    // printf("\n");
 					j--;
 					continue;
 				}
@@ -114,7 +130,11 @@ void init_parix_fo_gen_chunk_distrbtn(){
 
         //printf("%d-th stripe node_map:\n",i);
         for(j=0; j<num_chunks_in_stripe; j++)
+        {
             chunk_map[i*num_chunks_in_stripe+j]=chunk_to_node[j];//填写这个条带所有chunk所在node
+            //chunk_map[i*num_chunks_in_stripe+j]=j;
+        }
+            
 
     }
 
