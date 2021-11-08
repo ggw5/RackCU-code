@@ -407,7 +407,7 @@ void* prty_recv_data_process(void* ptr)
 	}
 
 	// copy the data 复制到td里
-	//td 才是从ar node传来的, 里面有此server node 的node id;
+	//td 才是从ar node传来的, 里面有此server node 的外部ip(存在 sent_ip中);
 	TRANSMIT_DATA* td=(TRANSMIT_DATA *)malloc(sizeof(TRANSMIT_DATA));
 	memcpy(td, recv_buff, sizeof(TRANSMIT_DATA));
 
