@@ -396,6 +396,7 @@ void* prty_recv_data_process(void* ptr)
 	char* pse_coded_data=(char*)malloc(sizeof(char)*chunk_size);
 
 	//receive data
+	//receive from ar node;
 	recv_len=0;
 	while(recv_len < sizeof(TRANSMIT_DATA))
 	{
@@ -406,6 +407,7 @@ void* prty_recv_data_process(void* ptr)
 	}
 
 	// copy the data 复制到td里
+	//td 才是从ar node传来的, 里面有此server node 的node id;
 	TRANSMIT_DATA* td=(TRANSMIT_DATA *)malloc(sizeof(TRANSMIT_DATA));
 	memcpy(td, recv_buff, sizeof(TRANSMIT_DATA));
 
@@ -512,6 +514,8 @@ void* prty_recv_data_process(void* ptr)
 void cau_prty_action(TRANSMIT_DATA* td, int rack_id, int server_socket)
 {
 	//printf("cau_parity_action begin\n");
+
+	//td is from mds
 
 	int global_chunk_id;
 	int updt_prty_id;
